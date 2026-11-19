@@ -1,0 +1,176 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "staffing_plans",
+  "position": {
+    "x": 44,
+    "y": 499,
+    "width": 1192,
+    "height": 168,
+    "z": 4000,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Plan"
+                }
+              },
+              "queryRef": "Weekly Plans.Plan",
+              "nativeQueryRef": "Plan"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Completed"
+                }
+              },
+              "queryRef": "Weekly Plans.Completed",
+              "nativeQueryRef": "Completed"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Peak backlog"
+                }
+              },
+              "queryRef": "Weekly Plans.Peak backlog",
+              "nativeQueryRef": "Peak backlog"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Friday backlog"
+                }
+              },
+              "queryRef": "Weekly Plans.Friday backlog",
+              "nativeQueryRef": "Friday backlog"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Overtime hours"
+                }
+              },
+              "queryRef": "Weekly Plans.Overtime hours",
+              "nativeQueryRef": "Overtime hours"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Labour cost (INR)"
+                }
+              },
+              "queryRef": "Weekly Plans.Labour cost (INR)",
+              "nativeQueryRef": "Labour cost (INR)"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Weekly Plans"
+                    }
+                  },
+                  "Property": "Meets targets"
+                }
+              },
+              "queryRef": "Weekly Plans.Meets targets",
+              "nativeQueryRef": "Meets targets"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Weekly Plans"
+                  }
+                },
+                "Property": "Plan"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Weekly staffing comparison'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,86 @@
+table 'Weekly Plans'
+	column 'Plan'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Plan
+		sortByColumn: 'Plan order'
+
+	column 'New requests'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: New requests
+
+	column 'Opening backlog'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Opening backlog
+
+	column 'Completed'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Completed
+
+	column 'Peak backlog'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Peak backlog
+
+	column 'Friday backlog'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Friday backlog
+
+	column 'Regular hours'
+		dataType: double
+		formatString: #,##0.##
+		summarizeBy: none
+		sourceColumn: Regular hours
+
+	column 'Overtime hours'
+		dataType: double
+		formatString: #,##0.##
+		summarizeBy: none
+		sourceColumn: Overtime hours
+
+	column 'Labour cost (INR)'
+		dataType: double
+		formatString: "₹"#,##0
+		summarizeBy: none
+		sourceColumn: Labour cost (INR)
+
+	column 'Cost per completed request (INR)'
+		dataType: double
+		formatString: "₹"#,##0.00
+		summarizeBy: none
+		sourceColumn: Cost per completed request (INR)
+
+	column 'Meets targets'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Meets targets
+
+	column 'Plan order'
+		dataType: int64
+		isHidden
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Plan order
+
+	partition 'Weekly Plans' = m
+		mode: import
+		source =
+			let
+				Sample = #table(type table [#"Plan" = text, #"New requests" = number, #"Opening backlog" = number, #"Completed" = number, #"Peak backlog" = number, #"Friday backlog" = number, #"Regular hours" = number, #"Overtime hours" = number, #"Labour cost (INR)" = number, #"Cost per completed request (INR)" = number, #"Meets targets" = text, #"Plan order" = number], {
+					{"Current staffing", 1230, 0, 1200, 150, 30, 240.0, 0.0, 84000.0, 70.0, "No", 1},
+					{"Shift regular hours", 1230, 0, 1200, 60, 30, 240.0, 0.0, 84000.0, 70.0, "No", 2},
+					{"Add overtime", 1230, 0, 1230, 30, 0, 240.0, 24.0, 96600.0, 78.53658536585365, "Yes", 3},
+					{"Shift hours + targeted overtime", 1230, 0, 1230, 30, 0, 240.0, 6.0, 87150.0, 70.85365853658537, "Yes", 4}
+				}),
+				Typed = Table.TransformColumnTypes(Sample, {{"New requests", Int64.Type}, {"Opening backlog", Int64.Type}, {"Completed", Int64.Type}, {"Peak backlog", Int64.Type}, {"Friday backlog", Int64.Type}, {"Plan order", Int64.Type}})
+			in
+				Typed

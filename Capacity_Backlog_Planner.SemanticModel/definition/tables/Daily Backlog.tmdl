@@ -1,0 +1,102 @@
+table 'Daily Backlog'
+	column 'Plan'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Plan
+
+	column 'Day order'
+		dataType: int64
+		isHidden
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Day order
+
+	column 'Day'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Day
+		sortByColumn: 'Day order'
+
+	column 'New requests'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: New requests
+
+	column 'Regular hours'
+		dataType: double
+		formatString: #,##0.##
+		summarizeBy: none
+		sourceColumn: Regular hours
+
+	column 'Overtime hours'
+		dataType: double
+		formatString: #,##0.##
+		summarizeBy: none
+		sourceColumn: Overtime hours
+
+	column 'Opening backlog'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Opening backlog
+
+	column 'Work available'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Work available
+
+	column 'Capacity'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Capacity
+
+	column 'Completed'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Completed
+
+	column 'Closing backlog'
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: none
+		sourceColumn: Closing backlog
+
+	column 'Labour cost (INR)'
+		dataType: double
+		formatString: "₹"#,##0
+		summarizeBy: none
+		sourceColumn: Labour cost (INR)
+
+	partition 'Daily Backlog' = m
+		mode: import
+		source =
+			let
+				Sample = #table(type table [#"Plan" = text, #"Day order" = number, #"Day" = text, #"New requests" = number, #"Regular hours" = number, #"Overtime hours" = number, #"Opening backlog" = number, #"Work available" = number, #"Capacity" = number, #"Completed" = number, #"Closing backlog" = number, #"Labour cost (INR)" = number], {
+					{"Current staffing", 1, "Monday", 350, 48.0, 0.0, 0, 350, 240, 240, 110, 16800.0},
+					{"Current staffing", 2, "Tuesday", 280, 48.0, 0.0, 110, 390, 240, 240, 150, 16800.0},
+					{"Current staffing", 3, "Wednesday", 230, 48.0, 0.0, 150, 380, 240, 240, 140, 16800.0},
+					{"Current staffing", 4, "Thursday", 195, 48.0, 0.0, 140, 335, 240, 240, 95, 16800.0},
+					{"Current staffing", 5, "Friday", 175, 48.0, 0.0, 95, 270, 240, 240, 30, 16800.0},
+					{"Shift regular hours", 1, "Monday", 350, 60.0, 0.0, 0, 350, 300, 300, 50, 21000.0},
+					{"Shift regular hours", 2, "Tuesday", 280, 56.0, 0.0, 50, 330, 280, 280, 50, 19600.0},
+					{"Shift regular hours", 3, "Wednesday", 230, 44.0, 0.0, 50, 280, 220, 220, 60, 15400.0},
+					{"Shift regular hours", 4, "Thursday", 195, 40.0, 0.0, 60, 255, 200, 200, 55, 14000.0},
+					{"Shift regular hours", 5, "Friday", 175, 40.0, 0.0, 55, 230, 200, 200, 30, 14000.0},
+					{"Add overtime", 1, "Monday", 350, 48.0, 16.0, 0, 350, 320, 320, 30, 25200.0},
+					{"Add overtime", 2, "Tuesday", 280, 48.0, 8.0, 30, 310, 280, 280, 30, 21000.0},
+					{"Add overtime", 3, "Wednesday", 230, 48.0, 0.0, 30, 260, 240, 240, 20, 16800.0},
+					{"Add overtime", 4, "Thursday", 195, 48.0, 0.0, 20, 215, 240, 215, 0, 16800.0},
+					{"Add overtime", 5, "Friday", 175, 48.0, 0.0, 0, 175, 240, 175, 0, 16800.0},
+					{"Shift hours + targeted overtime", 1, "Monday", 350, 60.0, 6.0, 0, 350, 330, 330, 20, 24150.0},
+					{"Shift hours + targeted overtime", 2, "Tuesday", 280, 56.0, 0.0, 20, 300, 280, 280, 20, 19600.0},
+					{"Shift hours + targeted overtime", 3, "Wednesday", 230, 44.0, 0.0, 20, 250, 220, 220, 30, 15400.0},
+					{"Shift hours + targeted overtime", 4, "Thursday", 195, 40.0, 0.0, 30, 225, 200, 200, 25, 14000.0},
+					{"Shift hours + targeted overtime", 5, "Friday", 175, 40.0, 0.0, 25, 200, 200, 200, 0, 14000.0}
+				}),
+				Typed = Table.TransformColumnTypes(Sample, {{"Day order", Int64.Type}, {"New requests", Int64.Type}, {"Opening backlog", Int64.Type}, {"Work available", Int64.Type}, {"Capacity", Int64.Type}, {"Completed", Int64.Type}, {"Closing backlog", Int64.Type}})
+			in
+				Typed

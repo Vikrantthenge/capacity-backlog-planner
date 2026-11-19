@@ -1,0 +1,24 @@
+{
+  "name": "CY26SU02",
+  "dataColors": [
+    "#566A82",
+    "#188078",
+    "#A66B21",
+    "#365FC7"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#182E47",
+  "tableAccent": "#365FC7",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 13,
+      "color": "#182E47"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 11,
+      "color": "#304A62"
+    }
+  }
+}

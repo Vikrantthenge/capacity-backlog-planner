@@ -1,0 +1,3 @@
+relationship aafa4609-8ae3-4a1c-851b-af12dbf6f382
+	fromColumn: 'Daily Backlog'.Plan
+	toColumn: 'Weekly Plans'.Plan

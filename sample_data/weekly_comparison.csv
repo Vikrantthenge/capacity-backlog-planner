@@ -1,0 +1,5 @@
+Plan,New requests,Opening backlog,Completed,Peak backlog,Friday backlog,Regular hours,Overtime hours,Labour cost (INR),Cost per completed request (INR),Meets targets
+Current staffing,1230,0,1200,150,30,240.0,0.0,84000.0,70.0,No
+Shift regular hours,1230,0,1200,60,30,240.0,0.0,84000.0,70.0,No
+Add overtime,1230,0,1230,30,0,240.0,24.0,96600.0,78.53658536585365,Yes
+Shift hours + targeted overtime,1230,0,1230,30,0,240.0,6.0,87150.0,70.85365853658537,Yes
