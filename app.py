@@ -1,3 +1,143 @@
+"""Streamlit interface for comparing shared-services staffing plans."""
+
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+from model import DAYS, DEFAULT_PLANS, StaffingPlan, meets_targets, recommend, simulate
+
+
+PROJECT_URL = "https://github.com/Vikrantthenge/capacity-backlog-planner"
+POWER_BI_PDF_URL = f"{PROJECT_URL}/blob/main/Capacity_Backlog_Planner.pdf"
+POWER_BI_PBIX_URL = (
+    "https://raw.githubusercontent.com/Vikrantthenge/capacity-backlog-planner/main/Capacity_Backlog_Planner.pbix"
+)
+
+
+st.set_page_config(page_title="Capacity & Backlog Planner", layout="wide")
+st.markdown(
+    """
+    <style>
+    .capacity-hero {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1.25rem 2rem;
+        padding: clamp(1.25rem, 3vw, 2.5rem);
+        border: 1px solid #356681;
+        border-radius: 18px;
+        background:
+            radial-gradient(ellipse at top right, #2d6177 0%, transparent 55%),
+            linear-gradient(120deg, #112039 12%, #163b54 100%);
+        box-shadow: 0 10px 30px rgba(13, 33, 55, 0.16);
+    }
+    .capacity-hero__intro {
+        flex: 1 1 28rem;
+        min-width: 0;
+    }
+    .capacity-hero h1 {
+        margin: 0;
+        padding: 0;
+        color: #ffffff;
+        font-size: clamp(1.85rem, 3.5vw, 3.15rem);
+        font-weight: 750;
+        line-height: 1.12;
+        letter-spacing: -0.035em;
+    }
+    .capacity-hero__intro p {
+        max-width: 37rem;
+        margin: 0.8rem 0 0;
+        color: #d7e7f0;
+        font-size: 1.02rem;
+        line-height: 1.55;
+    }
+    .capacity-hero__horizon {
+        flex: 0 1 auto;
+        padding: 0.9rem 1.1rem;
+        border: 1px solid #7093a7;
+        border-left: 3px solid #7fe2ce;
+        border-radius: 10px;
+        background: #102a40;
+    }
+    .capacity-hero__horizon span,
+    .capacity-hero__horizon strong {
+        display: block;
+    }
+    .capacity-hero__label {
+        color: #9ce9d9;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .capacity-hero__horizon strong {
+        margin: 0.25rem 0 0.15rem;
+        color: #ffffff;
+        font-size: 1.12rem;
+    }
+    .capacity-hero__note {
+        color: #d7e7f0;
+        font-size: 0.82rem;
+    }
+    </style>
+    <section class="capacity-hero" aria-labelledby="capacity-hero-title">
+        <div class="capacity-hero__intro">
+            <h1 id="capacity-hero-title">Capacity &amp; Backlog Planner</h1>
+            <p>Compare staffing and overtime plans to see which meets your backlog targets at the lowest cost.</p>
+        </div>
+        <div class="capacity-hero__horizon">
+            <span class="capacity-hero__label">Planning horizon</span>
+            <strong>Monday–Friday</strong>
+            <span class="capacity-hero__note">Simulated starting inputs</span>
+        </div>
+    </section>
+    """,
+    unsafe_allow_html=True,
+)
+
+with st.sidebar:
+    st.header("Planning assumptions")
+    productivity = st.number_input("Requests per paid hour", min_value=0.0, value=5.0, step=0.25)
+    regular_rate = st.number_input("Regular hourly cost (₹)", min_value=0.0, value=350.0, step=10.0)
+    overtime_rate = st.number_input("Overtime hourly cost (₹)", min_value=0.0, value=525.0, step=10.0)
+    opening_backlog = st.number_input("Requests carried into Monday", min_value=0, value=0, step=1)
+    st.header("Backlog targets")
+    friday_limit = st.number_input("Maximum open requests on Friday evening", min_value=0, value=0, step=1)
+    cap_daily = st.checkbox("Set a maximum daily closing backlog")
+    peak_limit = None
+    if cap_daily:
+        peak_limit = st.number_input("Maximum open requests at any day end", min_value=0, value=30, step=1)
+
+st.subheader("Daily demand")
+demand = []
+for column, day, sample in zip(st.columns(5), DAYS, (350, 280, 230, 195, 175)):
+    with column:
+        demand.append(st.number_input(day, min_value=0, value=sample, step=5, key=f"demand_{day}"))
+
+with st.expander("Edit staffing hours by plan"):
+    st.caption("Enter total team hours for each day. For example, six staff working eight hours each equals 48 team hours.")
+    staffing = pd.DataFrame(
+        {
+            "Plan": plan.name,
+            "Day": day,
+            "Regular hours": float(plan.regular_hours[index]),
+            "Overtime hours": float(plan.overtime_hours[index]),
+        }
+        for plan in DEFAULT_PLANS
+        for index, day in enumerate(DAYS)
+    )
+    edited = st.data_editor(
+        staffing,
+        key="staffing_hours",
+        hide_index=True,
+        disabled=["Plan", "Day"],
+        column_config={
+            "Regular hours": st.column_config.NumberColumn(min_value=0, required=True, step=0.5),
+            "Overtime hours": st.column_config.NumberColumn(min_value=0, required=True, step=0.5),
+        },
+    )
+
+if edited[["Regular hours", "Overtime hours"]].isna().any().any():
     st.error("Enter regular and overtime hours for every day. Enter 0 when no hours are planned.")
     st.stop()
 
