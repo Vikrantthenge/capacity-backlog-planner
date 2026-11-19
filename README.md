@@ -1,56 +1,57 @@
-# Capacity & Backlog Planner
 
-A portfolio project by **Vikrant Thenge** for operations managers in shared services, customer support, fulfilment, and other teams that process incoming work.
 
-## What decision does it support?
 
-Weekly volume rises from 1,000 requests to 1,230. Can the team clear all work by Friday? What does each staffing option cost, and how much work waits during the week?
 
-The app compares the current roster, moving regular hours to busier days, adding overtime, and moving regular hours with targeted overtime. Change daily demand, paid hours, productivity, hourly costs, or backlog targets to see the effects on completions and cost. The app identifies the lowest-cost plan that meets the selected targets among the four plans entered.
+Capacity & Backlog Planner
+An interactive staffing simulator for operations teams that need to clear a backlog by Friday while managing labour costs. Adjust demand, staffing hours, and backlog targets to compare four plans in Streamlit.
 
-## Case study
+View the Power BI report (PDF) · Download the Power BI file (.pbix)
 
-| Entered plan | Requests completed | Peak closing backlog | Friday backlog | Weekly labour cost |
-|---|---:|---:|---:|---:|
-| Current staffing | 1,200 | 150 | 30 | ₹84,000 |
-| Shift regular hours | 1,200 | 60 | 30 | ₹84,000 |
-| Add 24 overtime hours | 1,230 | 30 | 0 | ₹96,600 |
-| Shift regular hours + six Monday overtime hours | 1,230 | 30 | 0 | ₹87,150 |
+Case study
+A shared-services team expects 1,230 requests over five working days and wants to finish Friday with zero open requests. The app compares the current roster with three alternatives.
 
-**Recommendation.** Move regular hours to the busiest days and add six overtime hours on Monday, subject to staff availability and shift rules. In this simulation, the plan completes all 1,230 requests by Friday for ₹87,150, or ₹9,450 less than the 24-hour overtime option. It costs ₹3,150 more than the existing roster and clears the 30 requests that roster leaves open.
+Staffing plan	Requests completed	Peak end-of-day backlog	Friday backlog	Weekly labour cost
+Current staffing	1,200	150	30	₹84,000
+Move regular hours to busier days	1,200	60	30	₹84,000
+Add 24 hours of overtime	1,230	30	0	₹96,600
+Move regular hours and add 6 hours of Monday overtime	1,230	30	0	₹87,150
+Recommendation. Move regular hours to busier days and add six overtime hours on Monday. It was the lowest-cost option that met the Friday target among the four plans tested. It cost ₹9,450 less than the 24-hour overtime option and ₹3,150 more than the current roster, while clearing the 30 requests the current roster would leave open.
 
-The inputs are synthetic and the savings are a comparison between modeled scenarios. The model carries unfinished work forward each day and assumes a single rate of five completions per paid hour by default. A real pilot would use historical arrivals, completions and staff hours to calibrate the rate and check staffing feasibility. Individual turnaround and SLA performance require request timestamps.
+The figures come from simulated inputs. A real staffing decision would require historical demand and productivity data, plus a check that the proposed hours fit staff availability and shift rules.
 
-## Run locally
+Try the simulator
+Open Plan comparison and compare the Friday backlog and weekly cost for each plan.
+Change Monday demand from 350 to 320. The plan that shifts regular hours now clears the Friday backlog for ₹84,000.
+Restore Monday demand to 350, enable the daily closing backlog limit, and set it to 20. None of the four entered plans meets both backlog targets.
+The app also lets you change regular and overtime hours, hourly labour costs, requests completed per paid hour, and the work carried into Monday. Use Daily detail to see when the backlog builds and export the daily or weekly comparison as a CSV.
 
-Extract the project and open a terminal in the folder containing `app.py`. Tested with Python 3.12.
+How the model works
+Available work equals the opening backlog plus new requests. Unfinished requests carry into the next day.
+Daily capacity equals paid hours multiplied by requests completed per paid hour, rounded down. The app uses a single productivity rate across plans and days.
+Labour cost equals regular hours multiplied by the regular rate plus overtime hours multiplied by the overtime rate.
+Recommendation selects the lowest-cost entered plan that meets the backlog targets. If no plan qualifies, the app shows that result so the user can adjust the inputs.
+The model works with daily totals. Measuring request-level turnaround or service-level compliance requires timestamps for individual requests.
 
-```sh
+Run locally
+Clone or download the repository, then open a terminal in the folder containing app.py. The app was tested with Python 3.12.
+
 python -m pip install -r requirements.txt
 python -m streamlit run app.py
-```
+Project files
+File	Purpose
+`app.py`
+Streamlit interface and Plotly backlog chart
+`model.py`
+Capacity, backlog, cost, and plan selection logic
+`daily_plan_data.csv`
+Daily results for each plan
+`weekly_comparison.csv`
+Weekly results for the four plans
+The Power BI report shows the original simulated week. The Streamlit app recalculates the comparison when you change the inputs.
 
-On Windows, use `py` in place of `python` if needed. To publish on Streamlit Community Cloud, put the project files in a GitHub repository and select `app.py` as the entry point.
+Developed by Vikrant Thenge.
 
-## Demo in three minutes
 
-1. Open **Plan comparison**. Explain why two plans miss the Friday deadline even though moving hours reduces the midweek backlog.
-2. Change Monday demand from **350 to 320**. Look at how the recommendation changes when the team has 30 fewer requests to process.
-3. Restore **350** and set the daily closing backlog target to **20**. The current staffing options need further changes to reach that stricter target.
 
-## Power BI handoff
 
-The `sample_data` folder contains both CSV exports for the initial scenario. You can generate fresh CSVs from the app after editing inputs.
 
-| Import | What each row represents | Suggested visual |
-|---|---|---|
-| `daily_plan_data.csv` | One workday under one staffing plan | Line chart with Day on the X-axis, Closing backlog on the Y-axis, and Plan as the legend. Sort Day by Day order. |
-| `weekly_comparison.csv` | One staffing plan for the whole week | Table by Plan showing Completed, Friday backlog, Labour cost (INR), and Meets targets. |
-
-Each plan represents an alternative for the same week. Compare plans side by side and filter to one plan for headline totals.
-
-## Project files
-
-- `app.py` contains the Streamlit inputs, scenario comparison, charts and downloads.
-- `model.py` contains the backlog and cost calculations and the recommendation rule.
-- `requirements.txt` lists the Python dependencies.
