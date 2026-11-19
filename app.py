@@ -1,60 +1,3 @@
-"""Streamlit interface for comparing shared-services staffing plans."""
-
-import pandas as pd
-import plotly.express as px
-import streamlit as st
-
-from model import DAYS, DEFAULT_PLANS, StaffingPlan, meets_targets, recommend, simulate
-
-
-st.set_page_config(page_title="Capacity & Backlog Planner", layout="wide")
-st.title("Capacity & Backlog Planner")
-st.markdown("Compare staffing plans to see what it costs to meet your backlog targets.")
-st.caption("Five-day planning model. The initial values are simulated.")
-
-with st.sidebar:
-    st.header("Planning assumptions")
-    productivity = st.number_input("Requests per paid hour", min_value=0.0, value=5.0, step=0.25)
-    regular_rate = st.number_input("Regular hourly cost (₹)", min_value=0.0, value=350.0, step=10.0)
-    overtime_rate = st.number_input("Overtime hourly cost (₹)", min_value=0.0, value=525.0, step=10.0)
-    opening_backlog = st.number_input("Requests carried into Monday", min_value=0, value=0, step=1)
-    st.header("Backlog targets")
-    friday_limit = st.number_input("Maximum open requests on Friday evening", min_value=0, value=0, step=1)
-    cap_daily = st.checkbox("Set a maximum daily closing backlog")
-    peak_limit = None
-    if cap_daily:
-        peak_limit = st.number_input("Maximum open requests at any day end", min_value=0, value=30, step=1)
-
-st.subheader("Daily demand")
-demand = []
-for column, day, sample in zip(st.columns(5), DAYS, (350, 280, 230, 195, 175)):
-    with column:
-        demand.append(st.number_input(day, min_value=0, value=sample, step=5, key=f"demand_{day}"))
-
-with st.expander("Edit staffing hours by plan"):
-    st.caption("Enter total team hours for each day. For example, six staff working eight hours each equals 48 team hours.")
-    staffing = pd.DataFrame(
-        {
-            "Plan": plan.name,
-            "Day": day,
-            "Regular hours": float(plan.regular_hours[index]),
-            "Overtime hours": float(plan.overtime_hours[index]),
-        }
-        for plan in DEFAULT_PLANS
-        for index, day in enumerate(DAYS)
-    )
-    edited = st.data_editor(
-        staffing,
-        key="staffing_hours",
-        hide_index=True,
-        disabled=["Plan", "Day"],
-        column_config={
-            "Regular hours": st.column_config.NumberColumn(min_value=0, required=True, step=0.5),
-            "Overtime hours": st.column_config.NumberColumn(min_value=0, required=True, step=0.5),
-        },
-    )
-
-if edited[["Regular hours", "Overtime hours"]].isna().any().any():
     st.error("Enter regular and overtime hours for every day. Enter 0 when no hours are planned.")
     st.stop()
 
@@ -139,3 +82,30 @@ with method_tab:
         - **Scope** covers daily totals at one productivity rate. Request-level SLA reporting needs timestamps. Validate staffing feasibility, skill coverage and shift rules before changing a real roster.
         """
     )
+
+st.divider()
+st.subheader("Power BI report")
+st.caption("The report shows the original simulated week and compares all four staffing plans.")
+pdf_column, pbix_column = st.columns(2)
+with pdf_column:
+    st.link_button("View Power BI report (PDF)", POWER_BI_PDF_URL)
+with pbix_column:
+    st.link_button("Download Power BI file (.pbix)", POWER_BI_PBIX_URL)
+
+st.divider()
+st.markdown(
+    """
+    <footer aria-label="Developer and contact links" style="text-align:center; padding:0.4rem 0 1.25rem;">
+      <p style="margin:0 0 0.7rem;"><strong>Developed by Vikrant Thenge</strong></p>
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.55rem;">
+        <a href="mailto:vikrantthenge@outlook.com"
+           style="background:#0066B3; color:white; text-decoration:none; border-radius:6px; padding:0.35rem 0.8rem;">Email</a>
+        <a href="https://github.com/Vikrantthenge" target="_blank" rel="noopener noreferrer"
+           style="background:#24292F; color:white; text-decoration:none; border-radius:6px; padding:0.35rem 0.8rem;">GitHub</a>
+        <a href="https://www.linkedin.com/in/vthenge/" target="_blank" rel="noopener noreferrer"
+           style="background:#0A66C2; color:white; text-decoration:none; border-radius:6px; padding:0.35rem 0.8rem;">LinkedIn</a>
+      </div>
+    </footer>
+    """,
+    unsafe_allow_html=True,
+)
